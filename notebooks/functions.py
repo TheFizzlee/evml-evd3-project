@@ -19,7 +19,64 @@ def getConvexityDefects(contour):
 
     return defects
 
-def getAdvancedContourFeatures(contour):
+def getContourExtremes(contour):
+    """ Return contour extremes as an tuple of 4 tuples """
+    # determine the most extreme points along the contour
+    left = contour[contour[:, 0].argmin()]
+    right = contour[contour[:, 0].argmax()]
+    top = contour[contour[:, 1].argmin()]
+    bottom = contour[contour[:, 1].argmax()]
+
+    return np.array((left, right, top, bottom))
+
+# def getContourFeatures(contour):
+#     """ Return some contour features
+#     """    
+#     # basic contour features
+#     area = cv.contourArea(contour)
+#     perimeter = cv.arcLength(contour, True)
+#     extremePoints = getContourExtremes(contour)
+
+#     # get contour convexity defect depths
+#     # see https://docs.opencv.org/2.4/modules/imgproc/doc/structural_analysis_and_shape_descriptors.html
+#     defects = getConvexityDefects(contour)
+
+#     defect_depths = defects[:,-1]/256.0 if defects is not None else np.zeros((6,1))
+
+#     # select only the 6 largest depths
+#     defect_depths = np.flip(np.sort(defect_depths))[0:6]
+
+#     # compile a feature vector
+#     features = np.append(defect_depths, (area,perimeter))
+
+#     return (features, defects)
+
+def getHuMoments(moments):
+    """ Return scaled Hu Moments """
+    huMoments = cv.HuMoments(moments)
+    scaled_huMoments = -1.0 * np.sign(huMoments) * np.log10(abs(huMoments))
+
+    return np.squeeze(scaled_huMoments)
+
+def getBlobFeatures(img_BW):
+    """ Asssuming a BW image with a single white blob on a black background,
+        return some blob features.
+    """    
+    # scaled invariant moments
+    moments = cv.moments(img_BW)    
+    scaled_huMoments = getHuMoments(moments)    
+
+    # blob centroid
+    centroid = ( int(moments['m10']/moments['m00']),
+                 int(moments['m01']/moments['m00']) )
+
+    # compile a feature vector
+    features = np.append(scaled_huMoments, centroid)
+
+    return features
+
+
+def getContourFeatures(contour):
     """ Return advanced contour features based on contour analysis. """
     # Simple contour features
     area = cv.contourArea(contour)
@@ -83,8 +140,17 @@ def getAdvancedContourFeatures(contour):
         centroid_x,
         centroid_y
     ])
+
+    defects = getConvexityDefects(contour)
+
+    defect_depths = defects[:,-1]/256.0 if defects is not None else np.zeros((6,1))
+
+    # select only the 6 largest depths
+    defect_depths = np.flip(np.sort(defect_depths))[0:6]
+
+    feature_vector = np.append(defect_depths, features)
     
-    return features
+    return (features, defects, feature_vector)
 
 def unpackAdvancedFeatures(data, target):
     """Print the features and their corresponding labels."""
@@ -107,6 +173,7 @@ def unpackAdvancedFeatures(data, target):
         
         # Print the image index and its features
         print(f"{i:<10}{area:<15.2f}{perimeter:<15.2f}{aspect_ratio:<15.2f}{extent:<15.2f}{convex_hull_area:<20.2f}{hull_perimeter:<20.2f}{solidity:<15.2f}{circularity:<15.2f}{eccentricity:<15.2f}{num_convexity_defects:<20}{max_defect_depth:<20.2f}{major_axis_length:<20.2f}{minor_axis_length:<20.2f}{orientation:<15.2f}{scaled_huMoments:<15.2f}{centroid_x:<15.2f}{centroid_y:<15.2f}{label}")
+
 
 def excludeBorder(img_BW):
     # Create a border mask to exclude contours touching the image border
