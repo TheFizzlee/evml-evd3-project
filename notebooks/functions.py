@@ -198,3 +198,40 @@ def excludeBorder(img_BW):
     else:
         raise ValueError("No valid contours found after excluding border.")
     
+#Display the images when a list is given
+def displayImages(images, contour_images, contour, defects, window_size):
+    """
+    Display a list of images with optional contour and defect markings.
+
+    Parameters:
+    - images: List of images to display.
+    - contour_images: List of images where contours need to be drawn.
+    - contours: List of contours (one for each image).
+    - defects_list: List of defects (or None) for each image.
+    - window_size: Tuple specifying the desired window size (width, height).
+    """
+    for i, img in enumerate(images):
+
+        if any(np.array_equal(img, contour_img) for contour_img in contour_images):
+            img = cv.resize(img, window_size)
+
+            # draw the outline of the object
+            cv.drawContours(img, [contour], -1, (0, 255, 0), 1)
+
+            # point out hull defects
+            if defects is not None:
+                for s,e,f,d in defects:
+                    start = tuple(contour[s])
+                    end = tuple(contour[e])
+                    far = tuple(contour[f])
+                    cv.line(img,start,end,[0,255,255],2)
+                    cv.circle(img,far,5,[0,0,255],-1)
+
+            
+        else :
+            img = cv.resize(img, window_size)
+            pass
+
+        cv.imshow(f"Image {i+1}", img)
+    cv.waitKey(2000)
+    
