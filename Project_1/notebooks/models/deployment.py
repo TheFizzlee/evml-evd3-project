@@ -96,6 +96,12 @@ print("Starting video capture...")
 cap = cv.VideoCapture(0)  # 0 for default camera
 print("Video capture started successfully!")
 
+label_mapping = {
+    0: 'Paper',
+    1: 'Rock',
+    2: 'Scissors'
+}
+
 while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -108,32 +114,34 @@ while True:
     # Make predictions if features are available
     if features_array is not None:
         print("Extracted Features:", features_array)
-    
+
         # Create a DataFrame from the features_array with appropriate column names
         features_df = pd.DataFrame([features_array], columns=features)  # Ensure 'features' has the correct names
-        
+
         # Transform the features using the pipeline
         transformed_features = pipeline.transform(features_df)  # Now using DataFrame
         print("Transformed Features:", transformed_features)
-    
+
         # Convert the transformed features back to a DataFrame (if needed)
         features_transformed_df = pd.DataFrame(transformed_features, columns=features)  # Ensure consistency
-    
+
         # Predict using the model
         prediction = model.predict(features_transformed_df)
         label = prediction[0]  # Get the predicted label
-        print(f"Prediction: {label}")
-    
+
+        class_label = label_mapping.get(label, "Unknown")  # Default to "Unknown" if label is not in mapping
+        print(f"Prediction: {class_label}")
+
         # Draw a bounding box around the contour
         x, y, w, h = cv.boundingRect(hand_contour)
-        cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)  # Yellow box
-    
+        cv.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 0), 2)  # Black box
+
         # Display the label in the box
-        cv.putText(frame, f'Prediction: {label}', (x, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
-    
+        cv.putText(frame, f'Prediction: {class_label}', (x, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+
     # Show the frame
     cv.imshow('Live Hand Gesture Recognition', frame)
-    
+
     # Break the loop on 'q' key press
     if cv.waitKey(100) & 0xFF == ord('q'):
         print("Video capture stopped.")
