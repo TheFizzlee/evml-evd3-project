@@ -59,7 +59,7 @@ def extract_features_from_frame(frame):
     # Convert the image to the HSV color space
     hsv_img = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
 
-    # Define the skin color range (adjust these values based on your dataset)
+    # Define the skin color range
     lower_skin = np.array([0, 20, 70], dtype=np.uint8)
     upper_skin = np.array([20, 255, 255], dtype=np.uint8)
 
