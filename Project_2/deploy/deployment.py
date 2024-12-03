@@ -97,11 +97,15 @@ while True:
     # Display the frame using matplotlib
     cv.imshow('Frame', frame)
 
-    # Convert processed_img (PIL Image) to a NumPy array before displaying it
-    # processed_img_array = np.array(processed_img)
-    # # Convert from RGB (PIL format) to BGR (OpenCV format) if needed
-    # processed_img_bgr = cv.cvtColor(processed_img_array, cv.COLOR_RGB2BGR)
-    # cv.imshow('Processed Frame', np.array(processed_img))
+    # Convert PyTorch tensor to NumPy array
+    processed_img_np = processed_img.permute(1, 2, 0).numpy()  # Change from CxHxW to HxWxC
+
+    # Convert from RGB to BGR if needed (PyTorch tensors often follow RGB convention)
+    processed_img_bgr = cv.cvtColor(processed_img_np, cv.COLOR_RGB2BGR)
+
+    # Display using OpenCV
+    cv.imshow('Preprocessed Frame', processed_img_bgr)
+
 
     # Break the loop on 'q' key press
     if cv.waitKey(100) & 0xFF == ord('q'):
