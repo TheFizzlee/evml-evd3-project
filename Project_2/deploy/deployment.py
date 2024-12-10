@@ -36,7 +36,7 @@ class AutoExposure:
 
 print("Deployment script loaded successfully!")
 
-# Load your trained CNN model
+# Load the trained CNN model
 print("Loading model...")
 model = torch.load('model/model.pth', map_location=torch.device('cpu'))  # Load the model on CPU
 model.eval()  # Set the model to evaluation mode
@@ -55,7 +55,7 @@ label_mapping = {
 
 # Start video capture
 print("Starting video capture...")
-cap = cv.VideoCapture(0)  # 0 for default camera
+cap = cv.VideoCapture(1)  # 0 for default camera
 print("Video capture started successfully!")
 
 while True:
