@@ -55,7 +55,7 @@ label_mapping = {
 
 # Start video capture
 print("Starting video capture...")
-cap = cv.VideoCapture(1)  # 0 for default camera
+cap = cv.VideoCapture(0)  # 0 for default camera
 print("Video capture started successfully!")
 
 while True:
